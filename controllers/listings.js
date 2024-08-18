@@ -4,9 +4,24 @@ const mbxGeocoding = require("@mapbox/mapbox-sdk/services/geocoding");
 const mapToken = process.env.MAP_TOKEN;
 const geocodingClient = mbxGeocoding({ accessToken: mapToken });
 
+// module.exports.index = async (req, res) => {
+//   const allListings = await Listing.find({});
+//   res.render("listings/index.ejs", { allListings });
+// };
 module.exports.index = async (req, res) => {
+  const { country } = req.query;
   const allListings = await Listing.find({});
-  res.render("listings/index.ejs", { allListings });
+  let countryListing = country
+    ? allListings.filter(
+        (listing) => listing.country.toLowerCase() === country.toLowerCase()
+      )
+    : allListings;
+  // console.log(countryListing);
+  if (countryListing.length == 0) {
+    req.flash("error", "not available");
+    res.redirect("/listings");
+  }
+  res.render("listings/index.ejs", { allListings: countryListing });
 };
 
 module.exports.renderNewForm = (req, res) => {
